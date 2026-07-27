@@ -6,7 +6,7 @@ from llm_common import create_chat_completion, create_client
 client = create_client()
 
 
-# -------------------- Python 工具函数 --------------------
+# 工具
 
 
 def add_cat_sound(text: str) -> str:
@@ -19,7 +19,7 @@ def get_text_length(text: str) -> str:
     return str(len(text))
 
 
-# -------------------- 提供给模型的工具描述 --------------------
+# 工具描述
 
 TOOLS = [
     {
@@ -93,7 +93,8 @@ messages.append(assistant_message.model_dump(exclude_none=True))
 
 if not assistant_message.tool_calls:
     print("模型没有调用工具，直接回答：")
-    print(assistant_message.content)
+    print(assistant_message.content) # message.content是自然语言回答
+                                     #        .tool_calls是工具调用格式化
 else:
     print("模型请求调用工具：")
 
