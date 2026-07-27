@@ -1,7 +1,4 @@
-import ast
 import json
-import operator
-import random
 
 from llm_common import create_chat_completion, create_client
 
@@ -11,60 +8,15 @@ client = create_client()
 
 # -------------------- Python 工具函数 --------------------
 
-_OPERATORS = {
-    ast.Add: operator.add,
-    ast.Sub: operator.sub,
-    ast.Mult: operator.mul,
-    ast.Div: operator.truediv,
-}
+
+def add_cat_sound(text: str) -> str:
+    """在句子末尾加上“喵”。"""
+    return f"{text}喵"
 
 
-def _evaluate_number(node: ast.AST) -> int | float:
-    """只计算数字和四则运算，避免直接执行任意 Python 代码。"""
-    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
-        return node.value
-
-    if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
-        value = _evaluate_number(node.operand)
-        return value if isinstance(node.op, ast.UAdd) else -value
-
-    if isinstance(node, ast.BinOp) and type(node.op) in _OPERATORS:
-        left = _evaluate_number(node.left)
-        right = _evaluate_number(node.right)
-        return _OPERATORS[type(node.op)](left, right)
-
-    raise ValueError("只支持数字和 +、-、*、/ 四则运算")
-
-
-# 工具：计算器
-def calculate(expression: str) -> str:
-    try:
-        tree = ast.parse(expression, mode="eval")
-        result = _evaluate_number(tree.body)
-        return str(result)
-    except (SyntaxError, TypeError, ValueError, ZeroDivisionError) as error:
-        return f"计算失败：{error}"
-
-
-INTERVIEW_QUESTIONS = {
-    "Java 基础": [
-        "Java 中 == 和 equals() 有什么区别？",
-        "请解释 Java 的垃圾回收机制。",
-    ],
-    "Java 并发": [
-        "ThreadLocal 为什么可能导致内存泄漏？",
-        "synchronized 和 ReentrantLock 有什么区别？",
-    ],
-}
-
-
-# 工具：随机抽题
-def get_random_interview_question(category: str) -> str:
-    questions = INTERVIEW_QUESTIONS.get(category)
-    if not questions:
-        available_categories = "、".join(INTERVIEW_QUESTIONS)
-        return f"没有找到类别“{category}”，可选类别：{available_categories}"
-    return random.choice(questions)
+def get_text_length(text: str) -> str:
+    """返回文字长度。"""
+    return str(len(text))
 
 
 # -------------------- 提供给模型的工具描述 --------------------
@@ -73,34 +25,34 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "calculate",
-            "description": "计算只包含数字和四则运算符的数学表达式。",
+            "name": "add_cat_sound",
+            "description": "在用户提供的句子末尾加上一个“喵”。",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "expression": {
+                    "text": {
                         "type": "string",
-                        "description": "要计算的表达式，例如 12 * 8。",
+                        "description": "用户提供的原始句子。",
                     }
                 },
-                "required": ["expression"],
+                "required": ["text"],
             },
         },
     },
     {
         "type": "function",
         "function": {
-            "name": "get_random_interview_question",
-            "description": "根据 Java 面试题类别随机返回一道面试题。",
+            "name": "get_text_length",
+            "description": "统计用户提供的文字包含多少个字符。",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "category": {
+                    "text": {
                         "type": "string",
-                        "description": "面试题类别，例如 Java 基础 或 Java 并发。",
+                        "description": "需要统计长度的文字。",
                     }
                 },
-                "required": ["category"],
+                "required": ["text"],
             },
         },
     },
@@ -108,19 +60,19 @@ TOOLS = [
 
 
 AVAILABLE_TOOLS = {
-    "calculate": calculate,
-    "get_random_interview_question": get_random_interview_question,
+    "add_cat_sound": add_cat_sound,
+    "get_text_length": get_text_length,
 }
 
 
 messages = [
     {
         "role": "system",
-        "content": "你是一个 Java 面试助手。需要计算时使用计算工具，需要出题时使用面试题工具。",
+        "content": "你是一个文字助手。需要加喵时使用 add_cat_sound，需要统计字数时使用 get_text_length。",
     },
     {
         "role": "user",
-        "content": "请计算 12 * 8，并随机出一道 Java 并发面试题。",
+        "content": "请给“今天天气不错”加喵，并统计这句话有多少个字。",
     },
 ]
 
