@@ -1,22 +1,9 @@
 import json
-import os
 
-from dotenv import load_dotenv
-from openai import OpenAI
+from llm_common import create_chat_completion, create_client
 
 
-load_dotenv()
-
-api_key = os.getenv("DEEPSEEK_API_KEY")
-
-if not api_key:
-    raise RuntimeError("[04 Speaking]没有读取到 DEEPSEEK_API_KEY，请检查 .env 文件")
-
-
-client = OpenAI(
-    api_key=api_key,
-    base_url="https://api.deepseek.com",
-)
+client = create_client()
 
 
 messages = [
@@ -49,8 +36,8 @@ JSON格式如下：
 ]
 
 
-response = client.chat.completions.create(
-    model="deepseek-v4-flash",
+response = create_chat_completion(
+    client,
     messages=messages,
     temperature=0.2,
     max_tokens=400,

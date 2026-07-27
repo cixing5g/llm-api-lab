@@ -1,28 +1,12 @@
-import os
-
-from dotenv import load_dotenv
-from openai import OpenAI
+from llm_common import create_chat_completion, create_client
 
 
-load_dotenv()
-
-api_key = os.getenv("DEEPSEEK_API_KEY")
-
-if not api_key:
-    raise RuntimeError("[01 Speaking]没有读取到 DEEPSEEK_API_KEY，请检查 .env 文件")
-
-
-# 创建大模型客户端
-client = OpenAI(
-    api_key=api_key,
-    base_url="https://api.deepseek.com",
-)
+client = create_client()
 
 
 # 调用一次大模型
-response = client.chat.completions.create(
-    model="deepseek-v4-flash",
-    max_tokens=300,
+response = create_chat_completion(
+    client,
     messages=[
         {
             "role": "system",
@@ -33,8 +17,8 @@ response = client.chat.completions.create(
             "content": "请解释一下Java中的ThreadLocal。",
         },
     ],
+    max_tokens=300,
     stream=False,
-
     # 第一次实验先关闭思考模式，响应更快
     extra_body={
         "thinking": {
