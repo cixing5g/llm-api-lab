@@ -36,8 +36,8 @@ def _evaluate_number(node: ast.AST) -> int | float:
     raise ValueError("只支持数字和 +、-、*、/ 四则运算")
 
 
+# 工具：计算器
 def calculate(expression: str) -> str:
-    """计算一个只包含数字和四则运算符的表达式。"""
     try:
         tree = ast.parse(expression, mode="eval")
         result = _evaluate_number(tree.body)
@@ -58,8 +58,8 @@ INTERVIEW_QUESTIONS = {
 }
 
 
+# 工具：随机抽题
 def get_random_interview_question(category: str) -> str:
-    """根据面试题类别随机返回一道 Java 面试题。"""
     questions = INTERVIEW_QUESTIONS.get(category)
     if not questions:
         available_categories = "、".join(INTERVIEW_QUESTIONS)
