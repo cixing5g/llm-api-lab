@@ -1,42 +1,10 @@
 import json
 
+from agent_tools import TOOLS_CAT, add_cat_sound
 from llm_common import create_chat_completion, create_client
 
 
 client = create_client()
-
-
-def add_cat_sound(text: str) -> str:
-    """在句子末尾加上“喵”。"""
-    return f"{text}喵"
-
-# 定义一个工具列表，里面放多个工具
-TOOLS = [
-    # 开始定义第一个工具
-    {
-        "type": "function",  # 表示这个工具的类型是函数
-
-        # 开始描述这个函数工具的具体信息
-        "function": {
-            "name": "add_cat_sound",
-            "description": "在用户提供的句子末尾加上一个“喵”。",
-            "parameters": {
-
-                # 表示所有参数整体是一个对象，也就是 Python 字典
-                "type": "object",
-
-                # 定义这个参数对象中可以包含哪些字段
-                "properties": {
-                    "text": {  # 定义名为 text 的参数
-                        "type": "string",
-                        "description": "用户提供的原始句子。",
-                    }
-                },
-                "required": ["text"],  # 表示调用工具时 text 参数必须提供，不能省略
-            },
-        },
-    },
-]
 
 
 def run_agent(messages: list[dict]) -> str:
@@ -45,7 +13,7 @@ def run_agent(messages: list[dict]) -> str:
         response = create_chat_completion(
             client,
             messages=messages,
-            tools=TOOLS,
+            tools=TOOLS_CAT,
             tool_choice="auto",
             temperature=0.2,
             max_tokens=300,

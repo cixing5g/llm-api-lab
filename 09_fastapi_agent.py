@@ -3,37 +3,12 @@ import json
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from agent_tools import TOOLS_CAT, add_cat_sound
 from llm_common import create_chat_completion, create_client
 
 
 client = create_client()
 app = FastAPI(title="Simple Agent API")
-
-
-def add_cat_sound(text: str) -> str:
-    """在句子末尾加上“喵”。"""
-    return f"{text}喵"
-
-
-TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "add_cat_sound",
-            "description": "在用户提供的句子末尾加上一个“喵”。",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "用户提供的原始句子。",
-                    }
-                },
-                "required": ["text"],
-            },
-        },
-    },
-]
 
 
 class ChatRequest(BaseModel):
@@ -67,7 +42,7 @@ def run_agent(messages: list[dict]) -> str:
         response = create_chat_completion(
             client,
             messages=messages,
-            tools=TOOLS,
+            tools=TOOLS_CAT,
             tool_choice="auto",
             temperature=0.2,
             max_tokens=300,

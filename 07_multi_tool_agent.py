@@ -1,97 +1,10 @@
 import json
 
+from agent_tools import AVAILABLE_TOOLS, TOOLS_ALL
 from llm_common import create_chat_completion, create_client
 
 
 client = create_client()
-
-
-# -------------------- 工具函数 --------------------
-
-
-def add_cat_sound(text: str) -> str:
-    """在句子末尾加上“喵”。"""
-    return f"{text}喵"
-
-
-def get_text_length(text: str) -> str:
-    """返回文字长度。"""
-    return str(len(text))
-
-
-def divide_numbers(dividend: float, divisor: float) -> str:
-    """计算两个数字相除的结果。"""
-    if divisor == 0:
-        raise ValueError("除数不能为 0")
-    return str(dividend / divisor)
-
-
-# -------------------- 工具描述 --------------------
-
-TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "add_cat_sound",
-            "description": "在用户提供的句子末尾加上一个“喵”。",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "用户提供的原始句子。",
-                    }
-                },
-                "required": ["text"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_text_length",
-            "description": "统计用户提供的文字包含多少个字符。",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "需要统计长度的文字。",
-                    }
-                },
-                "required": ["text"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "divide_numbers",
-            "description": "计算两个数字相除的结果。",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "dividend": {
-                        "type": "number",
-                        "description": "被除数。",
-                    },
-                    "divisor": {
-                        "type": "number",
-                        "description": "除数。",
-                    },
-                },
-                "required": ["dividend", "divisor"],
-            },
-        },
-    },
-]
-
-
-AVAILABLE_TOOLS = {
-    "add_cat_sound": add_cat_sound,
-    "get_text_length": get_text_length,
-    "divide_numbers": divide_numbers,
-}
 
 
 def execute_tool(tool_call) -> str:
@@ -127,7 +40,7 @@ def run_agent(messages: list[dict], max_iterations: int = 5) -> str:
         response = create_chat_completion(
             client,
             messages=messages,
-            tools=TOOLS,
+            tools=TOOLS_ALL,
             tool_choice="auto",
             temperature=0.2,
             max_tokens=500,
